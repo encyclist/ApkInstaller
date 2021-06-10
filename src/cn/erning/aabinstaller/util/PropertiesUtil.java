@@ -17,6 +17,8 @@ public class PropertiesUtil {
     public static final String KEY_JKS_ALIAS = "jksAlias";
     public static final String KEY_JKS_ALIAS_PASS = "jksAliasPass";
 
+    private static boolean hide = false;
+
     public static Map<String, String> read() {
         Map<String,String> map = new HashMap<>();
         try {
@@ -49,7 +51,26 @@ public class PropertiesUtil {
             FileOutputStream oFile = new FileOutputStream("apkinstaller.properties", true);//true表示追加打开
             prop.store(oFile,null);
             oFile.close();
+            hideFile(new File("apkinstaller.properties"));
         }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private static void hideFile(File file){
+        if(hide){
+            return;
+        }
+        if(!file.exists()){
+            return;
+        }
+        try {
+            // R ： 只读文件属性。A：存档文件属性。S：系统文件属性。H：隐藏文件属性。
+            String sets = "attrib +H \"" + file.getAbsolutePath() + "\"";
+            // 运行命令
+            Runtime.getRuntime().exec(sets);
+            hide = true;
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
