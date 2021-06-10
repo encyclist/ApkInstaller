@@ -2,6 +2,7 @@ package cn.erning.aabinstaller.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Locale;
 
 /**
  * @author erning
@@ -22,20 +23,26 @@ public class Checker {
 
     public static void checkAab(File file){
         String fileName = file.getName();
-        if(!fileName.endsWith(".aab")){
+        if(!fileName.toLowerCase(Locale.ENGLISH).endsWith(".aab")){
             throw new IllegalArgumentException(file.getAbsolutePath()+"不是aab文件");
         }
     }
     public static void checkApks(File file){
         String fileName = file.getName();
-        if(!fileName.endsWith(".apks")){
+        if(!fileName.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
             throw new IllegalArgumentException(file.getAbsolutePath()+"不是apks文件");
         }
     }
     public static void checkApk(File file){
         String fileName = file.getName();
-        if(!fileName.endsWith(".apk")){
+        if(!fileName.toLowerCase(Locale.ENGLISH).endsWith(".apk")){
             throw new IllegalArgumentException(file.getAbsolutePath()+"不是apk文件");
+        }
+    }
+    public static void checkXapk(File file){
+        String fileName = file.getName();
+        if(!fileName.toLowerCase(Locale.ENGLISH).endsWith(".xapk")){
+            throw new IllegalArgumentException(file.getAbsolutePath()+"不是xapk文件");
         }
     }
 

@@ -17,6 +17,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.Locale;
 import java.util.Map;
 
 import static cn.erning.aabinstaller.util.PropertiesUtil.*;
@@ -91,7 +92,7 @@ public class Main {
         JButton apkButton = new JButton("选择安装包");
         apkButton.setBounds(10, 10, 180, 30);//设置按钮在容器中的位置
         apkButton.addActionListener(e -> {
-            File file = selectFile(PropertiesUtil.get(KEY_APK_PATH),"aab", "apks", "apk");
+            File file = selectFile(PropertiesUtil.get(KEY_APK_PATH),"aab", "apks", "apk","xapk");
             if (file != null) {
                 PropertiesUtil.put(KEY_APK_PATH,file.getAbsolutePath());
                 apkPathLabel.setText(file.getAbsolutePath());
@@ -170,8 +171,8 @@ public class Main {
         });
         f.add(refreshButton);
         // 添加 按钮 安装
-        JButton installButton = new JButton("安装(apk/apks)");
-        installButton.setBounds(360, 210, 140, 30);
+        JButton installButton = new JButton("安装(apk/apks/xapk)");
+        installButton.setBounds(360, 210, 160, 30);
         installButton.addActionListener(e -> {
             int index = jcb1.getSelectedIndex();
             Device device = null;
@@ -250,16 +251,18 @@ public class Main {
     }
 
     /**
-     * 安装apks/apk文件
+     * 安装apks/apk/xapk文件
      * @param device 要安装的设备：为null则不指定，由ADB选择
      */
     private static void installApks(JFrame f, String aabPath,Device device) {
         try {
-            if(aabPath.endsWith("apk")){
+            if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apk")){
                 Installer.installApk(aabPath,device);
-            }else{
+            }else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
                 noExitSecurityManager.exitFilter = true;
                 Installer.installApks(aabPath,device);
+            } else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".xapk")){
+                Installer.installXapk(aabPath,device);
             }
         } catch (ExitException e) {
             showInfoDialog(f, "完成");
@@ -267,9 +270,11 @@ public class Main {
             e.printStackTrace(printErrStream);
             showErrorDialog(f, e);
         } finally {
-            if(!aabPath.endsWith("apk")){
+            if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
                 Installer.resetAdbServer();
                 noExitSecurityManager.exitFilter = false;
+            }else{
+                showInfoDialog(f, "完成");
             }
         }
     }

@@ -1,5 +1,5 @@
 # ApkInstaller
-aab/apks/apk安装工具
+aab/apks/apk/xapk安装工具
 
 可以直接运行exe，也可以运行jar
 

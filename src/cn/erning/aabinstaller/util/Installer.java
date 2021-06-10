@@ -8,6 +8,7 @@ import com.android.tools.build.bundletool.device.DdmlibAdbServer;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.Locale;
 
 /**
  * @author erning
@@ -60,11 +61,11 @@ public class Installer {
         String[] args;
         if(hasAdb && device!=null){
             args = new String[4];
-            args[2] = "--adb="+adbPath;
+            args[2] = "--adb=\""+adbPath+"\"";
             args[3] = "--device-id="+device.getId();
         }else if(hasAdb){
             args = new String[3];
-            args[2] = "--adb="+adbPath;
+            args[2] = "--adb=\""+adbPath+"\"";
         }else if(device!=null){
             args = new String[3];
             args[2] = "--device-id="+device.getId();
@@ -72,7 +73,7 @@ public class Installer {
             args = new String[2];
         }
         args[0] = "install-apks";
-        args[1] = "--apks="+apksPath;
+        args[1] = "--apks=\""+apksPath+"\"";
 
         printArgs(args);
 
@@ -80,6 +81,9 @@ public class Installer {
         BundleToolMain.main(args);
     }
 
+    /**
+     * 安装apk
+     */
     public static void installApk(String apksPath,Device device) throws Exception{
         File apk = new File(apksPath);
         Checker.checkFileExists(apk,"apk");
@@ -97,7 +101,8 @@ public class Installer {
         if(device != null){
             sb.append(" -s").append(" ").append(device.getId());
         }
-        sb.append(" install").append(" ").append(apksPath);
+        sb.append(" install").append(" \"").append(apksPath).append("\"");
+        System.out.println("execute:\n"+sb.toString());
 
         Runtime run = Runtime.getRuntime();
         Process p = run.exec(sb.toString());
@@ -106,6 +111,94 @@ public class Installer {
         ins.read(bytes);
         System.out.println(new String(bytes));
         p.destroy();
+    }
+
+    /**
+     * 安装xapk
+     */
+    public static void installXapk(String apksPath,Device device) throws Exception{
+        File apk = new File(apksPath);
+        Checker.checkFileExists(apk,"xapk");
+        Checker.checkXapk(apk);
+
+        // 临时解压文件夹
+        String path = apk.getAbsolutePath()+".f";
+        UZipFile.unZipFiles(apk, path);
+
+        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
+        boolean hasAdb = new File(adbPath).exists();
+
+        StringBuilder sb = new StringBuilder();
+        if(hasAdb){
+            sb.append(adbPath);
+        }else{
+            sb.append("adb");
+        }
+        if(device != null){
+            sb.append(" -s").append(" ").append(device.getId());
+        }
+        sb.append(" install-multiple");
+        File dir = new File(path);
+        File[] apks = dir.listFiles();
+        if(apks != null){
+            for (File f:apks){
+                if(f.getName().toLowerCase(Locale.ENGLISH).endsWith(".apk")){
+                    sb.append(" ").append("\"").append(f.getAbsolutePath()).append("\"");
+                }
+            }
+        }
+        System.out.println("execute:\n"+sb.toString());
+
+        Runtime run = Runtime.getRuntime();
+        Process p = run.exec(sb.toString());
+        InputStream ins= p.getInputStream();
+        byte[] bytes = new byte[1024];
+        ins.read(bytes);
+        System.out.println(new String(bytes));
+        p.destroy();
+        // 复制obb文件夹
+        copyObb(dir,device);
+        // 删除临时文件
+        FileUtil.delete(dir);
+    }
+
+    /**
+     * 安装xapk后复制obb文件
+     * @param dir 本地解压的临时文件夹
+     */
+    private static void copyObb(File dir,Device device) throws Exception{
+        File obb = new File(dir,"Android/obb");
+        if(!obb.exists()){
+            // 没有obb文件
+            return;
+        }
+
+        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
+        boolean hasAdb = new File(adbPath).exists();
+
+        File[] obbs = obb.listFiles();
+        if(obbs != null){
+            Runtime run = Runtime.getRuntime();
+            for (File oneObbDir:obbs){
+                StringBuilder sb = new StringBuilder();
+                if(hasAdb){
+                    sb.append(adbPath);
+                }else{
+                    sb.append("adb");
+                }
+                if(device != null){
+                    sb.append(" -s").append(" ").append(device.getId());
+                }
+                sb.append(" push \"").append(oneObbDir.getAbsolutePath()).append("\" /sdcard/Android/obb/");
+
+                Process p = run.exec(sb.toString());
+                InputStream ins= p.getInputStream();
+                byte[] bytes = new byte[1024];
+                ins.read(bytes);
+                System.out.println(new String(bytes));
+                p.destroy();
+            }
+        }
     }
 
     /**
