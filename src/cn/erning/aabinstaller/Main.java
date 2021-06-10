@@ -8,6 +8,7 @@ import cn.erning.aabinstaller.util.PropertiesUtil;
 import cn.erning.aabinstaller.view.ConsolePane;
 import cn.erning.aabinstaller.view.JTextFieldHintListener;
 import cn.erning.aabinstaller.view.MyFileFilter;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
@@ -52,6 +53,13 @@ public class Main {
      * 初始化页面
      */
     private static void initView() {
+        try {
+            // 换个皮肤
+            FlatLightLaf.setup();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
         JFrame f = new JFrame("APK安装器");
         f.setSize(WIDTH + WIDTH_SHADOW, HEIGHT + HEIGHT_SHADOW);//设置容器尺寸
         f.setMinimumSize(new Dimension(WIDTH + WIDTH_SHADOW, HEIGHT + HEIGHT_SHADOW)); // 设置最小大小
