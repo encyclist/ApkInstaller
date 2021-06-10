@@ -79,9 +79,7 @@ public class ConsoleErrStream extends ByteArrayOutputStream {
             consoleListener.onConsole(s);
         }
         //切换回原输出流输出日志到真控制台
-        System.setErr(oldPrintStream);
-        System.err.print(s);
-        System.setErr(newPrintStream);
+        oldPrintStream.print(s);
         if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) - b.length > 0)) {
             throw new IndexOutOfBoundsException();
         }
