@@ -5,8 +5,10 @@ import com.android.ddmlib.AndroidDebugBridge;
 import com.android.tools.build.bundletool.BundleToolMain;
 import com.android.tools.build.bundletool.device.DdmlibAdbServer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.Locale;
 
@@ -102,15 +104,8 @@ public class Installer {
             sb.append(" -s").append(" ").append(device.getId());
         }
         sb.append(" install").append(" \"").append(apksPath).append("\"");
-        System.out.println("execute:\n"+sb.toString());
 
-        Runtime run = Runtime.getRuntime();
-        Process p = run.exec(sb.toString());
-        InputStream ins= p.getInputStream();
-        byte[] bytes = new byte[1024];
-        ins.read(bytes);
-        System.out.println(new String(bytes));
-        p.destroy();
+        executeCmd(sb.toString());
     }
 
     /**
@@ -147,15 +142,8 @@ public class Installer {
                 }
             }
         }
-        System.out.println("execute:\n"+sb.toString());
 
-        Runtime run = Runtime.getRuntime();
-        Process p = run.exec(sb.toString());
-        InputStream ins= p.getInputStream();
-        byte[] bytes = new byte[1024];
-        ins.read(bytes);
-        System.out.println(new String(bytes));
-        p.destroy();
+        executeCmd(sb.toString());
         // 复制obb文件夹
         copyObb(dir,device);
         // 删除临时文件
@@ -178,7 +166,6 @@ public class Installer {
 
         File[] obbs = obb.listFiles();
         if(obbs != null){
-            Runtime run = Runtime.getRuntime();
             for (File oneObbDir:obbs){
                 StringBuilder sb = new StringBuilder();
                 if(hasAdb){
@@ -191,14 +178,26 @@ public class Installer {
                 }
                 sb.append(" push \"").append(oneObbDir.getAbsolutePath()).append("\" /sdcard/Android/obb/");
 
-                Process p = run.exec(sb.toString());
-                InputStream ins= p.getInputStream();
-                byte[] bytes = new byte[1024];
-                ins.read(bytes);
-                System.out.println(new String(bytes));
-                p.destroy();
+                executeCmd(sb.toString());
             }
         }
+    }
+
+    private static void executeCmd(String cmd) throws Exception{
+        System.out.println("执行命令：");
+        System.out.println(cmd);
+        Runtime run = Runtime.getRuntime();
+        Process p = run.exec(cmd);
+        InputStream ins= p.getInputStream();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ins));
+        while (true){
+            String line = bufferedReader.readLine();
+            if (line == null){
+                break;
+            }
+            System.out.println(line);
+        }
+        p.destroy();
     }
 
     /**

@@ -12,7 +12,7 @@ public class FileUtil {
         if (file.exists()){
             if (file.isDirectory()) {
                 File[] files = file.listFiles();
-                if (files != null && files.length > 0) {
+                if (files != null) {
                     for (File f : files) {
                         delete(f);
                     }

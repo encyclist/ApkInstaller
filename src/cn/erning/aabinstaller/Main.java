@@ -86,7 +86,7 @@ public class Main {
         if(prop.containsKey(KEY_APK_PATH)){
             apkPathLabel.setText(prop.get(KEY_APK_PATH));
         }
-        apkPathLabel.setBounds(200, 10, WIDTH - 10 - 200, 30);
+        apkPathLabel.setBounds(200, 10, SCREEN_WIDTH - 10 - 200, 30);
         f.add(apkPathLabel);
         // 添加 按钮 选择安装包(aab或apks)
         JButton apkButton = new JButton("选择安装包");
@@ -104,7 +104,7 @@ public class Main {
         if(prop.containsKey(KEY_JKS_PATH)){
             jksPathLabel.setText(prop.get(KEY_JKS_PATH));
         }
-        jksPathLabel.setBounds(200, 50, WIDTH - 10 - 200, 30);
+        jksPathLabel.setBounds(200, 50, SCREEN_WIDTH - 10 - 200, 30);
         f.add(jksPathLabel);
         // 添加 按钮 选择密钥
         JButton jksButton = new JButton("选择密钥(aab用)");
