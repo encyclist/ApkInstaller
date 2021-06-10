@@ -8,7 +8,7 @@ import cn.erning.aabinstaller.util.PropertiesUtil;
 import cn.erning.aabinstaller.view.ConsolePane;
 import cn.erning.aabinstaller.view.JTextFieldHintListener;
 import cn.erning.aabinstaller.view.MyFileFilter;
-import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.FlatIntelliJLaf;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
@@ -55,7 +55,7 @@ public class Main {
     private static void initView() {
         try {
             // 换个皮肤
-            FlatLightLaf.setup();
+            FlatIntelliJLaf.setup();
         }catch(Exception e) {
             e.printStackTrace();
         }
