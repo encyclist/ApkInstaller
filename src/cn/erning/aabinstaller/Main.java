@@ -17,6 +17,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.PrintStream;
+import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
 
@@ -164,7 +165,8 @@ public class Main {
         // 添加 按钮 刷新设备列表
         JButton refreshButton = new JButton();
         refreshButton.setBounds(320,210,30,30);
-        Icon icon = new ImageIcon("src/res/ic_refresh.png","刷新");
+        URL imgURL = Main.class.getResource("/res/ic_refresh.png");
+        Icon icon = new ImageIcon(imgURL,"刷新");
         refreshButton.setIcon(icon);
         refreshButton.addActionListener(e -> {
             refreshDeviceListBox(jcb1);
