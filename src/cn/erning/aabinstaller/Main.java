@@ -285,14 +285,14 @@ public class Main {
                 }
                 showInfoDialog(f, "完成");
             } catch (ExitException e) {
-                noExitSecurityManager.exitFilter = false;
-                Installer.resetAdbServer();
                 showInfoDialog(f, "完成");
             } catch (Exception e) {
                 e.printStackTrace(printErrStream);
                 showErrorDialog(f, e);
             }finally {
                 splash.dispose();
+                noExitSecurityManager.exitFilter = false;
+                Installer.resetAdbServer();
             }
         }).start();
 
