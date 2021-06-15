@@ -93,6 +93,7 @@ public class Main {
         JButton apkButton = new JButton("选择安装包");
         apkButton.setBounds(10, 10, 180, 30);//设置按钮在容器中的位置
         apkButton.addActionListener(e -> {
+            System.out.println("点击 选择安装包 按钮");
             File file = selectFile(PropertiesUtil.get(KEY_APK_PATH),"aab", "apks", "apk","xapk");
             if (file != null) {
                 PropertiesUtil.put(KEY_APK_PATH,file.getAbsolutePath());
@@ -111,6 +112,7 @@ public class Main {
         JButton jksButton = new JButton("选择密钥(aab用)");
         jksButton.setBounds(10, 50, 180, 30);
         jksButton.addActionListener(e -> {
+            System.out.println("点击 选择密钥 按钮");
             File file = selectFile(PropertiesUtil.get(KEY_JKS_PATH),"jks");
             if (file != null) {
                 PropertiesUtil.put(KEY_JKS_PATH,file.getAbsolutePath());
@@ -146,6 +148,7 @@ public class Main {
         JButton convertButton = new JButton("aab转apks");
         convertButton.setBounds(10, 210, 100, 30);
         convertButton.addActionListener(e -> {
+            System.out.println("点击 aab转apks 按钮");
             String aabPath = apkPathLabel.getText();
             String jksPath = jksPathLabel.getText();
             String jksPass = jksPassTextField.getText();
@@ -169,6 +172,7 @@ public class Main {
         Icon icon = new ImageIcon(imgURL,"刷新");
         refreshButton.setIcon(icon);
         refreshButton.addActionListener(e -> {
+            System.out.println("点击 刷新 按钮");
             refreshDeviceListBox(jcb1);
         });
         f.add(refreshButton);
@@ -176,6 +180,7 @@ public class Main {
         JButton installButton = new JButton("安装(apk/apks/xapk)");
         installButton.setBounds(360, 210, 160, 30);
         installButton.addActionListener(e -> {
+            System.out.println("点击 安装 按钮");
             int index = jcb1.getSelectedIndex();
             Device device = null;
             if (index != 0){
@@ -266,18 +271,14 @@ public class Main {
             } else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".xapk")){
                 Installer.installXapk(aabPath,device);
             }
+            showInfoDialog(f, "完成");
         } catch (ExitException e) {
+            noExitSecurityManager.exitFilter = false;
+            Installer.resetAdbServer();
             showInfoDialog(f, "完成");
         } catch (Exception e) {
             e.printStackTrace(printErrStream);
             showErrorDialog(f, e);
-        } finally {
-            if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
-                Installer.resetAdbServer();
-                noExitSecurityManager.exitFilter = false;
-            }else{
-                showInfoDialog(f, "完成");
-            }
         }
     }
 
