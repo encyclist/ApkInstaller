@@ -75,7 +75,7 @@ public class Installer {
             args = new String[2];
         }
         args[0] = "install-apks";
-        args[1] = "--apks=\""+apksPath+"\"";
+        args[1] = "--apks="+apksPath;
 
         printArgs(args);
 

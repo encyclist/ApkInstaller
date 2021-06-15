@@ -8,6 +8,7 @@ import cn.erning.aabinstaller.util.PropertiesUtil;
 import cn.erning.aabinstaller.view.ConsolePane;
 import cn.erning.aabinstaller.view.JTextFieldHintListener;
 import cn.erning.aabinstaller.view.MyFileFilter;
+import cn.erning.aabinstaller.view.MyProgressBar;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 
 import javax.swing.*;
@@ -18,8 +19,10 @@ import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static cn.erning.aabinstaller.util.PropertiesUtil.*;
 
@@ -105,6 +108,9 @@ public class Main {
         JLabel jksPathLabel = new JLabel("");
         if(prop.containsKey(KEY_JKS_PATH)){
             jksPathLabel.setText(prop.get(KEY_JKS_PATH));
+        }else{
+            File file = new File("sign.jks");
+            jksPathLabel.setText(file.getAbsolutePath());
         }
         jksPathLabel.setBounds(200, 50, SCREEN_WIDTH - 10 - 200, 30);
         f.add(jksPathLabel);
@@ -124,25 +130,19 @@ public class Main {
         JTextField jksPassTextField = new JTextField();
         jksPassTextField.setBounds(10, 90, WIDTH - 10 - 10, 30);
         jksPassTextField.addFocusListener(new JTextFieldHintListener("签名文件密码(aab用)", jksPassTextField));
-        if(prop.containsKey(KEY_JKS_PASS)){
-            jksPassTextField.setText(prop.get(KEY_JKS_PASS));
-        }
+        jksPassTextField.setText(prop.getOrDefault(KEY_JKS_PASS, "123456"));
         f.add(jksPassTextField);
         // 添加 输入框 别名
         JTextField jksAliasTextField = new JTextField();
         jksAliasTextField.setBounds(10, 130, WIDTH - 10 - 10, 30);
         jksAliasTextField.addFocusListener(new JTextFieldHintListener("密钥别名(aab用)", jksAliasTextField));
-        if(prop.containsKey(KEY_JKS_ALIAS)){
-            jksAliasTextField.setText(prop.get(KEY_JKS_ALIAS));
-        }
+        jksAliasTextField.setText(prop.getOrDefault(KEY_JKS_ALIAS, "123456"));
         f.add(jksAliasTextField);
         // 添加 输入框 别名密码
         JTextField jksAliasPassTextField = new JTextField();
         jksAliasPassTextField.setBounds(10, 170, WIDTH - 10 - 10, 30);
         jksAliasPassTextField.addFocusListener(new JTextFieldHintListener("密钥密码(aab用)", jksAliasPassTextField));
-        if(prop.containsKey(KEY_JKS_ALIAS_PASS)){
-            jksAliasPassTextField.setText(prop.get(KEY_JKS_ALIAS_PASS));
-        }
+        jksAliasPassTextField.setText(prop.getOrDefault(KEY_JKS_ALIAS_PASS, "123456"));
         f.add(jksAliasPassTextField);
         // 添加 按钮 aab转apks
         JButton convertButton = new JButton("aab转apks");
@@ -243,18 +243,25 @@ public class Main {
      * 生成apks文件
      */
     private static void buildApks(JFrame f, String aabPath, String jksPath, String jksPass, String jksAlias, String jksAliasPass) {
-        try {
-            noExitSecurityManager.exitFilter = true;
-            Installer.buildApks(aabPath, jksPath, jksPass, jksAlias, jksAliasPass);
-        } catch (ExitException e) {
-            showInfoDialog(f, "完成");
-        } catch (Exception e) {
-            e.printStackTrace(printErrStream);
-            showErrorDialog(f, e);
-        } finally {
-            noExitSecurityManager.exitFilter = false;
-            Installer.resetAdbServer();
-        }
+        MyProgressBar splash = new MyProgressBar(f, "请稍候", "转换中，请稍候...");
+        Runnable target = () -> {
+            try {
+                splash.show();
+                noExitSecurityManager.exitFilter = true;
+                Installer.buildApks(aabPath, jksPath, jksPass, jksAlias, jksAliasPass);
+            } catch (ExitException e) {
+                showInfoDialog(f, "完成");
+            } catch (Exception e) {
+                e.printStackTrace(printErrStream);
+                showErrorDialog(f, e);
+            } finally {
+                noExitSecurityManager.exitFilter = false;
+                Installer.resetAdbServer();
+                splash.dispose();
+            }
+        };
+        Thread thread = new Thread(target);
+        thread.start();
     }
 
     /**
@@ -262,24 +269,33 @@ public class Main {
      * @param device 要安装的设备：为null则不指定，由ADB选择
      */
     private static void installApks(JFrame f, String aabPath,Device device) {
-        try {
-            if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apk")){
-                Installer.installApk(aabPath,device);
-            }else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
-                noExitSecurityManager.exitFilter = true;
-                Installer.installApks(aabPath,device);
-            } else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".xapk")){
-                Installer.installXapk(aabPath,device);
+        MyProgressBar splash = new MyProgressBar(f, "请稍候", "安装中，请稍候...");
+        new Thread(() -> {
+            try {
+                if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apk")){
+                    splash.show();
+                    Installer.installApk(aabPath,device);
+                }else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".apks")){
+                    splash.show();
+                    noExitSecurityManager.exitFilter = true;
+                    Installer.installApks(aabPath,device);
+                } else if(aabPath.toLowerCase(Locale.ENGLISH).endsWith(".xapk")){
+                    splash.show();
+                    Installer.installXapk(aabPath,device);
+                }
+                showInfoDialog(f, "完成");
+            } catch (ExitException e) {
+                noExitSecurityManager.exitFilter = false;
+                Installer.resetAdbServer();
+                showInfoDialog(f, "完成");
+            } catch (Exception e) {
+                e.printStackTrace(printErrStream);
+                showErrorDialog(f, e);
+            }finally {
+                splash.dispose();
             }
-            showInfoDialog(f, "完成");
-        } catch (ExitException e) {
-            noExitSecurityManager.exitFilter = false;
-            Installer.resetAdbServer();
-            showInfoDialog(f, "完成");
-        } catch (Exception e) {
-            e.printStackTrace(printErrStream);
-            showErrorDialog(f, e);
-        }
+        }).start();
+
     }
 
     /**
