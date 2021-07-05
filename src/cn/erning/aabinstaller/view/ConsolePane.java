@@ -37,7 +37,7 @@ public class ConsolePane extends JScrollPane {
         System.setErr(mySystemErr);
 
         textPane.setEditable(false);
-        textPane.setText("日志：\n");
+        textPane.setText("目录中不要有空格等特殊符号：\n日志：\n");
     }
 
     /**

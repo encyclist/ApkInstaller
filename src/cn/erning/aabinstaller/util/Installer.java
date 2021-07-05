@@ -103,7 +103,7 @@ public class Installer {
         if(device != null){
             sb.append(" -s").append(" ").append(device.getId());
         }
-        sb.append(" install").append(" \"").append(apksPath).append("\"");
+        sb.append(" install").append(apksPath);
 
         executeCmd(sb.toString());
     }
@@ -138,7 +138,7 @@ public class Installer {
         if(apks != null){
             for (File f:apks){
                 if(f.getName().toLowerCase(Locale.ENGLISH).endsWith(".apk")){
-                    sb.append(" ").append("\"").append(f.getAbsolutePath()).append("\"");
+                    sb.append(" ").append(f.getAbsolutePath());
                 }
             }
         }
