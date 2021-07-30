@@ -63,11 +63,11 @@ public class Installer {
         String[] args;
         if(hasAdb && device!=null){
             args = new String[4];
-            args[2] = "--adb=\""+adbPath+"\"";
+            args[2] = "--adb="+adbPath+"";
             args[3] = "--device-id="+device.getId();
         }else if(hasAdb){
             args = new String[3];
-            args[2] = "--adb=\""+adbPath+"\"";
+            args[2] = "--adb="+adbPath+"";
         }else if(device!=null){
             args = new String[3];
             args[2] = "--device-id="+device.getId();
@@ -103,7 +103,7 @@ public class Installer {
         if(device != null){
             sb.append(" -s").append(" ").append(device.getId());
         }
-        sb.append(" install").append(apksPath);
+        sb.append(" install ").append("\"").append(apksPath).append("\"");
 
         executeCmd(sb.toString());
     }
@@ -138,7 +138,7 @@ public class Installer {
         if(apks != null){
             for (File f:apks){
                 if(f.getName().toLowerCase(Locale.ENGLISH).endsWith(".apk")){
-                    sb.append(" ").append(f.getAbsolutePath());
+                    sb.append(" ").append("\"").append(f.getAbsolutePath()).append("\"");
                 }
             }
         }
@@ -176,7 +176,7 @@ public class Installer {
                 if(device != null){
                     sb.append(" -s").append(" ").append(device.getId());
                 }
-                sb.append(" push \"").append(oneObbDir.getAbsolutePath()).append("\" /sdcard/Android/obb/");
+                sb.append(" push \"").append(oneObbDir.getAbsolutePath()).append("\" /sdcard/Android/obb/").append(oneObbDir.getName());
 
                 executeCmd(sb.toString());
             }
