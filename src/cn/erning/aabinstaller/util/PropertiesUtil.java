@@ -1,5 +1,7 @@
 package cn.erning.aabinstaller.util;
 
+import com.android.tools.r8.graph.F;
+
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,10 @@ public class PropertiesUtil {
     public static Map<String, String> read() {
         Map<String,String> map = new HashMap<>();
         try {
+            File f = new File("apkinstaller.properties");
+            if(!f.exists()){
+                f.createNewFile();
+            }
             InputStream in = new BufferedInputStream(new FileInputStream("apkinstaller.properties"));
 
             Properties prop = new Properties();
@@ -48,10 +54,14 @@ public class PropertiesUtil {
             ///保存属性到b.properties文件
             prop.setProperty(key, value);
 
+            File f = new File("apkinstaller.properties");
+            if(!f.exists()){
+                f.createNewFile();
+            }
             FileOutputStream oFile = new FileOutputStream("apkinstaller.properties", true);//true表示追加打开
             prop.store(oFile,null);
             oFile.close();
-            hideFile(new File("apkinstaller.properties"));
+//            hideFile(new File("apkinstaller.properties"));
         }catch (IOException e){
             e.printStackTrace();
         }
