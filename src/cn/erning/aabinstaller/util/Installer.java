@@ -334,7 +334,7 @@ public class Installer {
         boolean hasAdb = new File(adbPath).exists();
         System.out.println("ADB文件路径："+adbPath);
         if(!hasAdb){
-            System.err.println("ADB文件不存在，请在此jar文件目录下运行-jar命令，如环境变量中有ADB则可以忽略");
+            System.out.println("ADB文件不存在，请在此jar文件目录下运行-jar命令，如环境变量中有ADB则可以忽略");
         }
         return hasAdb ? adbPath : null;
     }

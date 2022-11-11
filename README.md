@@ -12,4 +12,3 @@ aab/apks/apk/xapk安装工具
 
 ## 问题
 * ~~好吧，它在Mac上不能正常工作，但我懒得改了~~ 改好了
-* mac上请在**此jar文件所在目录**使用`java -jar ApkInstaller.jar`运行，否则会没有磁盘权限，如果你已经 *给Java所有磁盘访问权限* 或 *环境变量中已有ADB* 了就当我没说

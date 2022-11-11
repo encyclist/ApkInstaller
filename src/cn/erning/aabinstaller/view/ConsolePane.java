@@ -32,9 +32,13 @@ public class ConsolePane extends JScrollPane {
         PrintStream mySystemOut = new MyPrintStream(System.out, Color.BLACK);
         System.setOut(mySystemOut);
 
-        // Set up System.err   
-        PrintStream mySystemErr = new MyPrintStream(System.err, Color.RED);
-        System.setErr(mySystemErr);
+        /*
+         * System.out.println    能重定向到别的输出流，比如输出到txt文本中；
+         * 而System.err.println  只能在屏幕上实现打印，即便重定向也一样。
+         * System.out.println有可能在缓存中，由OS和JVM决定是否输出，而System.err.println它将每一次操作的结果都输出来。
+         */
+//        PrintStream mySystemErr = new MyPrintStream(System.err, Color.RED);
+//        System.setErr(mySystemErr);
 
         textPane.setEditable(false);
         textPane.setText("目录中不要有空格等特殊符号：\n日志：\n");

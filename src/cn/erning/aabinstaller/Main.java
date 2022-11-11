@@ -302,7 +302,7 @@ public class Main {
      * 显示错误弹窗
      */
     private static void showErrorDialog(JFrame jf, Exception ex) {
-        System.err.println(ex.getMessage());
+        System.out.println(ex.getMessage());
         JOptionPane.showMessageDialog(
                 jf,
                 ex.getMessage(),
