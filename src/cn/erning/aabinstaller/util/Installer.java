@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * @author erning
@@ -57,15 +57,14 @@ public class Installer {
         Checker.checkFileExists(apks,"apks");
         Checker.checkApks(apks);
 
-        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
-        boolean hasAdb = new File(adbPath).exists();
+        String adbPath = getAdbPath();
 
         String[] args;
-        if(hasAdb && device!=null){
+        if(adbPath!=null && device!=null){
             args = new String[4];
             args[2] = "--adb="+adbPath+"";
             args[3] = "--device-id="+device.getId();
-        }else if(hasAdb){
+        }else if(adbPath != null){
             args = new String[3];
             args[2] = "--adb="+adbPath+"";
         }else if(device!=null){
@@ -91,21 +90,18 @@ public class Installer {
         Checker.checkFileExists(apk,"apk");
         Checker.checkApk(apk);
 
-        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
-        boolean hasAdb = new File(adbPath).exists();
+        String adbPath = getAdbPath();
 
-        StringBuilder sb = new StringBuilder();
-        if(hasAdb){
-            sb.append(adbPath);
-        }else{
-            sb.append("adb");
-        }
+        ArrayList<String> cmd = new ArrayList<>();
+        cmd.add(Objects.requireNonNullElse(adbPath, "adb"));
         if(device != null){
-            sb.append(" -s").append(" ").append(device.getId());
+            cmd.add("-s");
+            cmd.add(device.getId());
         }
-        sb.append(" install ").append("\"").append(apksPath).append("\"");
+        cmd.add("install");
+        cmd.add(apksPath);
 
-        executeCmd(sb.toString());
+        executeCmd(cmd);
     }
 
     /**
@@ -120,30 +116,26 @@ public class Installer {
         String path = apk.getAbsolutePath()+".f";
         UZipFile.unZipFiles(apk, path);
 
-        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
-        boolean hasAdb = new File(adbPath).exists();
+        String adbPath = getAdbPath();
 
-        StringBuilder sb = new StringBuilder();
-        if(hasAdb){
-            sb.append(adbPath);
-        }else{
-            sb.append("adb");
-        }
+        ArrayList<String> cmd = new ArrayList<>();
+        cmd.add(Objects.requireNonNullElse(adbPath, "adb"));
         if(device != null){
-            sb.append(" -s").append(" ").append(device.getId());
+            cmd.add("-s");
+            cmd.add(device.getId());
         }
-        sb.append(" install-multiple");
+        cmd.add("install-multiple");
         File dir = new File(path);
         File[] apks = dir.listFiles();
         if(apks != null){
             for (File f:apks){
                 if(f.getName().toLowerCase(Locale.ENGLISH).endsWith(".apk")){
-                    sb.append(" ").append("\"").append(f.getAbsolutePath()).append("\"");
+                    cmd.add(f.getAbsolutePath());
                 }
             }
         }
 
-        executeCmd(sb.toString());
+        executeCmd(cmd);
         // 复制obb文件夹
         copyObb(dir,device);
         // 删除临时文件
@@ -161,24 +153,22 @@ public class Installer {
             return;
         }
 
-        String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
-        boolean hasAdb = new File(adbPath).exists();
+        String adbPath = getAdbPath();
 
         File[] obbs = obb.listFiles();
         if(obbs != null){
             for (File oneObbDir:obbs){
-                StringBuilder sb = new StringBuilder();
-                if(hasAdb){
-                    sb.append(adbPath);
-                }else{
-                    sb.append("adb");
-                }
+                ArrayList<String> cmd = new ArrayList<>();
+                cmd.add(Objects.requireNonNullElse(adbPath, "adb"));
                 if(device != null){
-                    sb.append(" -s").append(" ").append(device.getId());
+                    cmd.add("-s");
+                    cmd.add(device.getId());
                 }
-                sb.append(" push \"").append(oneObbDir.getAbsolutePath()).append("\" /sdcard/Android/obb/").append(oneObbDir.getName());
+                cmd.add("push");
+                cmd.add(oneObbDir.getAbsolutePath());
+                cmd.add("/sdcard/Android/obb/"+oneObbDir.getName());
 
-                executeCmd(sb.toString());
+                executeCmd(cmd);
             }
         }
     }
@@ -188,6 +178,24 @@ public class Installer {
         System.out.println(cmd);
         Runtime run = Runtime.getRuntime();
         Process p = run.exec(cmd);
+        InputStream ins= p.getInputStream();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ins));
+        while (true){
+            String line = bufferedReader.readLine();
+            if (line == null){
+                break;
+            }
+            System.out.println(line);
+        }
+        p.destroy();
+    }
+
+    private static void executeCmd(List<String> cmd) throws Exception{
+        String[] cmdList = ArrayUtil.list2Array(cmd);
+        System.out.println("执行命令：");
+        System.out.println(Arrays.toString(cmdList));
+        Runtime run = Runtime.getRuntime();
+        Process p = run.exec(cmdList);
         InputStream ins= p.getInputStream();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ins));
         while (true){
@@ -241,7 +249,7 @@ public class Installer {
     }
 
     /**
-     * 打印将要执行的指令
+     * 打印将要执行的指令，使用bundletool时才有效
      */
     private static void printArgs(String[] args){
         if(args == null){
@@ -264,17 +272,13 @@ public class Installer {
      */
     public static Device[] getDevices(){
         try {
-            String adbPath = new File("").getAbsolutePath()+"\\adb.exe";
-            boolean hasAdb = new File(adbPath).exists();
+            String adbPath = getAdbPath();
 
-            String cmd;
-            if(hasAdb){
-                cmd = adbPath+" devices";
-            }else{
-                cmd = "adb devices";
-            }
+            ArrayList<String> cmd = new ArrayList<>();
+            cmd.add(Objects.requireNonNullElse(adbPath, "adb"));
+            cmd.add("devices");
             Runtime run = Runtime.getRuntime();
-            Process p = run.exec(cmd);
+            Process p = run.exec(ArrayUtil.list2Array(cmd));
             InputStream ins= p.getInputStream();
             byte[] bytes = new byte[1024];
             ins.read(bytes);
@@ -318,5 +322,20 @@ public class Installer {
             }
         }
         return newDevices;
+    }
+
+    private static String getAdbPath(){
+        String adbPath;
+        if(System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")){
+            adbPath = new File("").getAbsolutePath()+"\\adb.exe";
+        }else{
+            adbPath = new File("").getAbsolutePath()+"/adb";
+        }
+        boolean hasAdb = new File(adbPath).exists();
+        System.out.println("ADB文件路径："+adbPath);
+        if(!hasAdb){
+            System.err.println("ADB文件不存在，请在此jar文件目录下运行-jar命令，如环境变量中有ADB则可以忽略");
+        }
+        return hasAdb ? adbPath : null;
     }
 }
