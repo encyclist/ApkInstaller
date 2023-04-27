@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Main-Class: cn.erning.aabinstaller.Main
-Implementation-Version: 1.2.1
+Implementation-Version: 1.2.2
 

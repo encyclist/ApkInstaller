@@ -327,9 +327,9 @@ public class Installer {
     private static String getAdbPath(){
         String adbPath;
         if(System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")){
-            adbPath = new File("").getAbsolutePath()+"\\adb.exe";
+            adbPath = new File(FileUtil.getSelfPath()).getAbsolutePath()+"\\adb.exe";
         }else{
-            adbPath = new File("").getAbsolutePath()+"/adb";
+            adbPath = new File(FileUtil.getSelfPath()).getAbsolutePath()+"/adb";
         }
         boolean hasAdb = new File(adbPath).exists();
         System.out.println("ADB文件路径："+adbPath);
@@ -338,4 +338,6 @@ public class Installer {
         }
         return hasAdb ? adbPath : null;
     }
+
+
 }
