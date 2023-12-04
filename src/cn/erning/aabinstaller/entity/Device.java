@@ -10,6 +10,9 @@ public class Device {
     private String name;
     private String str;
 
+    public Device() {
+    }
+
     public Device(String str) {
         if(str == null){
             return;

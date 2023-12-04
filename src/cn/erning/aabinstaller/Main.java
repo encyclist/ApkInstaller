@@ -45,13 +45,61 @@ public class Main {
 
     /**
      * 程序运行
+     * java -jar ApkInstaller.jar xxx -adb:xxx -o:xx.apk -d:xx -jksPath:xx -jksPass:xx -jksAlias:xx -jksAliasPass:xx
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        if(args != null && args.length > 0){
+            runCmd(args);
+            return;
+        }
         // 拦截exit
         System.setSecurityManager(noExitSecurityManager);
         noExitSecurityManager.exitFilter = false;
 
         initView();
+    }
+
+    private static void runCmd(String[] args) throws Exception {
+        String command = args[0];
+        String apkFile = getArgValue(args,"-o:");
+        String deviceId = getArgValue(args,"-d:");
+        String adb = getArgValue(args,"-adb:");
+        String jksPath = getArgValue(args,"-jksPath:");
+        String jksPass = getArgValue(args,"-jksPass:");
+        String jksAlias = getArgValue(args,"-jksAlias:");
+        String jksAliasPass = getArgValue(args,"-jksAliasPass:");
+
+        Installer.externalAdbPath = adb;
+        Device device = new Device();
+        device.setId(deviceId);
+
+        switch (command){
+            case "install-apk":{
+                Installer.installApk(apkFile,device);
+                break;
+            }
+            case "install-apks":{
+                Installer.installApks(apkFile,device);
+                break;
+            }
+            case "install-xapk":{
+                Installer.installXapk(apkFile,device);
+                break;
+            }
+            case "build-apks":{
+                Installer.buildApks(apkFile, jksPath, jksPass, jksAlias, jksAliasPass);
+                break;
+            }
+        }
+    }
+
+    private static String getArgValue(String[] args,String key){
+        for (String arg : args) {
+            if (arg.startsWith(key)) {
+                return arg.replaceFirst(key,"");
+            }
+        }
+        return null;
     }
 
     /**

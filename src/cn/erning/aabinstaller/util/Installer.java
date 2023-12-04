@@ -258,7 +258,7 @@ public class Installer {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("\nexecute:\n");
-        sb.append("java -jar bundletool-1.2.0.jar");
+        sb.append("java -jar bundletool-all-1.15.6.jar");
         for (String s:args){
             sb.append(" ").append(s);
         }
@@ -324,7 +324,11 @@ public class Installer {
         return newDevices;
     }
 
+    public static String externalAdbPath = null;
     private static String getAdbPath(){
+        if(externalAdbPath != null){
+            return externalAdbPath;
+        }
         String adbPath;
         if(System.getProperties().getProperty("os.name").toLowerCase().startsWith("windows")){
             adbPath = new File(FileUtil.getSelfPath()).getAbsolutePath()+"\\adb.exe";
