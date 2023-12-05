@@ -1,4 +1,6 @@
 # ApkInstaller
+此功能已合并到[AndroidAdbUtil](https://github.com/encyclist/AndroidAdbTool)
+
 aab/apks/apk/xapk安装工具
 
 ## 使用：
